@@ -66,25 +66,15 @@ app.get('/get', function(req, res){
 
 
 app.get('/set', function(req, res){
-	{
-		client.set("theKeyToHappiness", "Don't worry, be happy");
-		client.expire("theKeyToHappiness", 10);
-		res.send('set');
-	}
+	client.set("theKeyToHappiness", "Don't worry, be happy");
+	client.expire("theKeyToHappiness", 10);
+	res.send('set');
 });
 
 app.get('/recent', function(req, res){
-	client.llen(mostRecentLstKey, function(err, value){
-		if(value > 1){
 			client.lrange(mostRecentLstKey, 0, 5, function(err, value){
-				res.send(value[1]);
+				res.send(value);
 				console.log("Most Recent:" + value);
-			})
-		}
-		else{
-			res.send("No most recent");
-			console.log("No Most Recent");
-		}
 	})
 });
 
