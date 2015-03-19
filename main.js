@@ -3,8 +3,8 @@ var multer  = require('multer')
 var express = require('express')
 var fs      = require('fs')
 var app = express()
-// REDIS
-//var client = redis.createClient(6379, '127.0.0.1', {})
+
+var client = redis.createClient(6379, '127.0.0.1', {})
 
 ///////////// WEB ROUTES
 
@@ -12,8 +12,8 @@ var app = express()
 app.use(function(req, res, next) 
 {
 	console.log(req.method, req.url);
-
-	// ... INSERT HERE.
+	client.lpush("mostRecentLst", req.url);
+	client.ltrim("mostRecentLst", 0 , 4);
 
 	next(); // Passing the request to the next handler in the stack.
 });
@@ -47,12 +47,46 @@ app.use(function(req, res, next)
 // 	}
 // })
 
+
+app.get('/', function(req, res){
+	{
+		res.send('hello world');
+	}
+});
+
+app.get('/get', function(req, res){
+	{
+		client.get("theKeyToHappiness", function(err,value){
+			console.log(value);
+			res.send(value);
+		});
+	}
+});
+
+
+app.get('/set', function(req, res){
+	{
+		client.set("theKeyToHappiness", "Don't worry, be happy");
+		client.expire("theKeyToHappiness", 10);
+		res.send('set');
+	}
+});
+
+app.get('/recent', function(req, res){
+	{
+		client.lrange("mostRecentLst", 0, 5, function(err, value){
+			res.send(value[1]);
+			console.log("Most Recent:" + value);
+		});
+	}
+})
+
 // HTTP SERVER
-// var server = app.listen(3000, function () {
+ var server = app.listen(3000, function () {
 
-//   var host = server.address().address
-//   var port = server.address().port
+   var host = server.address().address
+   var port = server.address().port
 
-//   console.log('Example app listening at http://%s:%s', host, port)
-// })
+   console.log('Example app listening at http://%s:%s', host, port)
+ })
 
