@@ -6,14 +6,15 @@ var app = express()
 
 var client = redis.createClient(6379, '127.0.0.1', {})
 
+var mostRecentLstKey = "mostRecentLst";
 ///////////// WEB ROUTES
 
 // Add hook to make it easier to get all visited URLS.
 app.use(function(req, res, next) 
 {
 	console.log(req.method, req.url);
-	client.lpush("mostRecentLst", req.url);
-	client.ltrim("mostRecentLst", 0 , 4);
+	client.lpush(mostRecentLstKey, req.url);
+	client.ltrim(mostRecentLstKey, 0 , 4);
 
 	next(); // Passing the request to the next handler in the stack.
 });
@@ -73,13 +74,20 @@ app.get('/set', function(req, res){
 });
 
 app.get('/recent', function(req, res){
-	{
-		client.lrange("mostRecentLst", 0, 5, function(err, value){
-			res.send(value[1]);
-			console.log("Most Recent:" + value);
-		});
-	}
-})
+	client.llen(mostRecentLstKey, function(err, value){
+		if(value > 1){
+			client.lrange(mostRecentLstKey, 0, 5, function(err, value){
+				res.send(value[1]);
+				console.log("Most Recent:" + value);
+			})
+		}
+		else{
+			res.send("No most recent");
+			console.log("No Most Recent");
+		}
+	})
+});
+
 
 // HTTP SERVER
  var server = app.listen(3000, function () {
