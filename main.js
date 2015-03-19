@@ -29,7 +29,6 @@ app.get('/upload', function(req, res){
 
 
 app.post('/upload',[ multer({ dest: './uploads/'}), function(req, res){
-	console.log(req)
 	console.log(req.body) // form fields
 	console.log(req.files) // form files
 	if( req.files.image )
@@ -37,7 +36,7 @@ app.post('/upload',[ multer({ dest: './uploads/'}), function(req, res){
 		fs.readFile( req.files.image.path, function (err, data) {
 			if (err) throw err;
 			var img = new Buffer(data).toString('base64');
-			client.lpush(imageLstKey, img);
+			client.lpush(imgLstKey, img);
 		});
 	}
 	else
@@ -47,17 +46,13 @@ app.post('/upload',[ multer({ dest: './uploads/'}), function(req, res){
     res.status(204).end()
  }]);
 
-// app.get('/meow', function(req, res) {
-// 	{
-// 		if (err) throw err
-// 		res.writeHead(200, {'content-type':'text/html'});
-// 		items.forEach(function (imagedata) 
-// 		{
-//    		res.write("<h1>\n<img src='data:my_pic.jpg;base64,"+imagedata+"'/>");
-// 		});
-//    	res.end();
-// 	}
-// })
+app.get('/meow', function(req, res) {
+	res.writeHead(200, {'content-type':'text/html'});
+	client.lrange(imgLstKey, 0, 0, function(err, imagedata){
+		res.write("<h1>\n<img src='data:my_pic.jpg;base64,"+imagedata[0]+"'/>");
+		res.end();
+	})	
+})
 
 
 app.get('/', function(req, res){
