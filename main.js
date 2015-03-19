@@ -7,6 +7,10 @@ var app = express()
 var client = redis.createClient(6379, '127.0.0.1', {})
 
 var mostRecentLstKey = "mostRecentLst";
+var imgLstKey = "images"
+
+app.use(express.static(__dirname + '/public'));
+
 ///////////// WEB ROUTES
 
 // Add hook to make it easier to get all visited URLS.
@@ -19,22 +23,29 @@ app.use(function(req, res, next)
 	next(); // Passing the request to the next handler in the stack.
 });
 
+app.get('/upload', function(req, res){
+	res.sendFile(__dirname + '/public/upload.html');
+})
 
-// app.post('/upload',[ multer({ dest: './uploads/'}), function(req, res){
-//    console.log(req.body) // form fields
-//    console.log(req.files) // form files
 
-//    if( req.files.image )
-//    {
-// 	   fs.readFile( req.files.image.path, function (err, data) {
-// 	  		if (err) throw err;
-// 	  		var img = new Buffer(data).toString('base64');
-// 	  		console.log(img);
-// 		});
-// 	}
-
-//    res.status(204).end()
-// }]);
+app.post('/upload',[ multer({ dest: './uploads/'}), function(req, res){
+	console.log(req)
+	console.log(req.body) // form fields
+	console.log(req.files) // form files
+	if( req.files.image )
+	{
+		fs.readFile( req.files.image.path, function (err, data) {
+			if (err) throw err;
+			var img = new Buffer(data).toString('base64');
+			client.lpush(imageLstKey, img);
+		});
+	}
+	else
+	{
+		res.status(406).end()
+	}
+    res.status(204).end()
+ }]);
 
 // app.get('/meow', function(req, res) {
 // 	{
