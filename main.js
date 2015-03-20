@@ -48,12 +48,25 @@ app.post('/upload',[ multer({ dest: './uploads/'}), function(req, res){
 
 app.get('/meow', function(req, res) {
 	res.writeHead(200, {'content-type':'text/html'});
-	client.lrange(imgLstKey, 0, 0, function(err, imagedata){
-		res.write("<h1>\n<img src='data:my_pic.jpg;base64,"+imagedata[0]+"'/>");
-		res.end();
-	})	
-})
 
+    client.llen(imgLstKey, function(err, value){
+        if(value > 1){
+        	client.lpop(imgLstKey, function(err, imagedata){
+        		res.write("<h1>\n<img src='data:my_pic.jpg;base64,"+imagedata+"'/>");
+        		res.end();
+        	})	
+        }
+        else if (value = 1){
+        	client.lrange(imgLstKey, 0, 0, function(err, imagedata){
+        		res.write("<h1>\n<img src='data:my_pic.jpg;base64,"+imagedata[0]+"'/>");
+        		res.end();
+        	})	        	
+        }
+        else{
+        	res.write("No Image");
+        	res.end();
+        }})
+})
 
 app.get('/', function(req, res){
 	{
