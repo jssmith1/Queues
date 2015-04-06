@@ -67,9 +67,20 @@ app.get('/', function(req, res){
 	}
 });
 
+app.get('/switch', function(req, res){
+	//If images in pic list
+	client.lrange(imgLstKey, 0, -1, function(err, value){
+		for(var i = 0; i < value.length; i++){
+			otherClient.rpush(imgLstKey, value[i]);
+		}
+	})
+	//Migrate to other redis client
+});
+
 app.get('/get', function(req, res){
 	{
 		client.get("theKeyToHappiness", function(err,value){
+			if(err) throw err;
 			console.log(value);
 			res.send(value);
 		});
