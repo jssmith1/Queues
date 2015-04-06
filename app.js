@@ -63,7 +63,7 @@ app.get('/meow', function(req, res) {
 
 app.get('/', function(req, res){
 	{
-		res.send('Green');
+		res.send('Blue');
 	}
 });
 
