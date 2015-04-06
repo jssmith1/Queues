@@ -14,6 +14,8 @@ var otherClient = redis.createClient(otherRedisPort, '127.0.0.1', {});
 var mostRecentLstKey = "mostRecentLst";
 var imgLstKey = "images";
 
+var MIRROR = true;
+
 app.use(express.static(__dirname + '/public'));
 
 ///////////// WEB ROUTES
@@ -42,6 +44,9 @@ app.post('/upload',[ multer({ dest: './uploads/'}), function(req, res){
 			if (err) throw err;
 			var img = new Buffer(data).toString('base64');
 			client.lpush(imgLstKey, img);
+			if (MIRROR){
+				otherClient.lpush(imgLstKey, img);
+			}
 		});
 	}
 	else
@@ -58,6 +63,9 @@ app.get('/meow', function(req, res) {
 		res.write("<h1>\n<img src='data:my_pic.jpg;base64,"+imagedata+"'/>");
 		res.end();
 	})
+	if (MIRROR){
+		otherClient.lpop(imgLstKey, function(err, imagedata){});
+	}
 
 })
 
