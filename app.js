@@ -7,6 +7,7 @@ var app = express()
 var myRedisPort = parseInt(process.argv.slice(3));
 var otherRedisPort = parseInt(process.argv.slice(4));
 
+var color = process.argv.slice(5);
 
 var client = redis.createClient(myRedisPort, '127.0.0.1', {});
 var otherClient = redis.createClient(otherRedisPort, '127.0.0.1', {});
@@ -71,17 +72,17 @@ app.get('/meow', function(req, res) {
 
 app.get('/', function(req, res){
 	{
-		res.send('Green');
+		res.send(color);
 	}
 });
 
 app.get('/switch', function(req, res){
-	//If images in pic list
 	client.lrange(imgLstKey, 0, -1, function(err, value){
 		for(var i = 0; i < value.length; i++){
 			otherClient.rpush(imgLstKey, value[i]);
 		}
 	})
+	res.send("Switched from" + color);
 	//Migrate to other redis client
 });
 
