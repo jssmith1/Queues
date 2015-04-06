@@ -4,10 +4,15 @@ var express = require('express')
 var fs      = require('fs')
 var app = express()
 
-var client = redis.createClient(6379, '127.0.0.1', {})
+var myRedisPort = parseInt(process.argv.slice(3));
+var otherRedisPort = parseInt(process.argv.slice(4));
+
+
+var client = redis.createClient(myRedisPort, '127.0.0.1', {});
+var otherClient = redis.createClient(otherRedisPort, '127.0.0.1', {});
 
 var mostRecentLstKey = "mostRecentLst";
-var imgLstKey = "images"
+var imgLstKey = "images";
 
 app.use(express.static(__dirname + '/public'));
 
