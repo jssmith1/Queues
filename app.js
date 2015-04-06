@@ -77,12 +77,14 @@ app.get('/', function(req, res){
 });
 
 app.get('/switch', function(req, res){
-	client.lrange(imgLstKey, 0, -1, function(err, value){
-		for(var i = 0; i < value.length; i++){
-			otherClient.rpush(imgLstKey, value[i]);
-		}
-	})
-	res.send("Switched from" + color);
+	if(!MIRROR){ //Don't copy if images are already mirrored
+		client.lrange(imgLstKey, 0, -1, function(err, value){
+			for(var i = 0; i < value.length; i++){
+				otherClient.rpush(imgLstKey, value[i]);
+			}
+		})
+	}
+	res.send("Switched from " + color);
 	//Migrate to other redis client
 });
 
